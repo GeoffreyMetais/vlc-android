@@ -606,8 +606,6 @@ public class VideoPlayerActivity extends AppCompatActivity implements IVLCVout.C
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        if (!AndroidUtil.isHoneycombOrLater)
-            changeSurfaceLayout();
         super.onConfigurationChanged(newConfig);
         getWindowManager().getDefaultDisplay().getMetrics(mScreen);
         mCurrentScreenOrientation = newConfig.orientation;
@@ -650,11 +648,9 @@ public class VideoPlayerActivity extends AppCompatActivity implements IVLCVout.C
         filter.addAction(Constants.EXIT_PLAYER);
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 mServiceReceiver, filter);
-        if (mBtReceiver != null) {
-            final IntentFilter btFilter = new IntentFilter(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
-            btFilter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
-            registerReceiver(mBtReceiver, btFilter);
-        }
+        final IntentFilter btFilter = new IntentFilter(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
+        btFilter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
+        registerReceiver(mBtReceiver, btFilter);
         UiTools.setViewVisibility(mOverlayInfo, View.INVISIBLE);
     }
 
@@ -664,8 +660,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements IVLCVout.C
         super.onStop();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mServiceReceiver);
 
-        if (mBtReceiver != null)
-            unregisterReceiver(mBtReceiver);
+        unregisterReceiver(mBtReceiver);
         if (mAlertDialog != null && mAlertDialog.isShowing())
             mAlertDialog.dismiss();
         if (mDisplayManager.isPrimary() && !isFinishing() && mService != null && mService.isPlaying()
@@ -739,10 +734,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements IVLCVout.C
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void surfaceFrameAddLayoutListener(boolean add) {
-        if (!AndroidUtil.isHoneycombOrLater || mSurfaceFrame == null
-                || add == (mOnLayoutChangeListener != null))
-            return;
-
+        if (mSurfaceFrame == null || add == (mOnLayoutChangeListener != null)) return;
         if (add) {
             mOnLayoutChangeListener = new View.OnLayoutChangeListener() {
                 private final Runnable mRunnable = new Runnable() {
@@ -841,7 +833,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements IVLCVout.C
     private void setPlaybackParameters() {
         if (mAudioDelay != 0L && mAudioDelay != mService.getAudioDelay())
             mService.setAudioDelay(mAudioDelay);
-        else if (mBtReceiver != null && (mAudioManager.isBluetoothA2dpOn() || mAudioManager.isBluetoothScoOn()))
+        else if (mAudioManager.isBluetoothA2dpOn() || mAudioManager.isBluetoothScoOn())
             toggleBtDelay(true);
         if (mSpuDelay != 0L && mSpuDelay != mService.getSpuDelay())
             mService.setSpuDelay(mSpuDelay);
@@ -1383,7 +1375,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements IVLCVout.C
     public void endPlaybackSetting() {
         mTouchAction = TOUCH_NONE;
         mService.saveMediaMeta();
-        if (mBtReceiver != null && mPlaybackSetting == DelayState.AUDIO
+        if (mPlaybackSetting == DelayState.AUDIO
                 && (mAudioManager.isBluetoothA2dpOn() || mAudioManager.isBluetoothScoOn())) {
             String msg = getString(R.string.audio_delay) + "\n"
                     + mService.getAudioDelay() / 1000L
@@ -2889,12 +2881,9 @@ public class VideoPlayerActivity extends AppCompatActivity implements IVLCVout.C
      */
     @TargetApi(Build.VERSION_CODES.KITKAT)
     private void dimStatusBar(boolean dim) {
-        if (dim || mIsLocked)
-            mActionBar.hide();
-        else
-            mActionBar.show();
-        if (!AndroidUtil.isHoneycombOrLater || mIsNavMenu)
-            return;
+        if (mIsNavMenu) return;
+        if (dim || mIsLocked) mActionBar.hide();
+        else mActionBar.show();
         int visibility = 0;
         int navbar = 0;
 
@@ -2904,10 +2893,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements IVLCVout.C
         }
         if (dim || mIsLocked) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            if (AndroidUtil.isICSOrLater)
-                navbar |= View.SYSTEM_UI_FLAG_LOW_PROFILE;
-            else
-                visibility |= View.STATUS_BAR_HIDDEN;
+            navbar |= View.SYSTEM_UI_FLAG_LOW_PROFILE;
             if (!AndroidDevices.hasCombBar) {
                 navbar |= View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
                 if (AndroidUtil.isKitKatOrLater)
@@ -2918,10 +2904,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements IVLCVout.C
         } else {
             mActionBar.show();
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            if (AndroidUtil.isICSOrLater)
-                visibility |= View.SYSTEM_UI_FLAG_VISIBLE;
-            else
-                visibility |= View.STATUS_BAR_VISIBLE;
+            visibility |= View.SYSTEM_UI_FLAG_VISIBLE;
         }
 
         if (AndroidDevices.hasNavBar)
@@ -2931,8 +2914,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements IVLCVout.C
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void showTitle() {
-        if (!AndroidUtil.isHoneycombOrLater || mIsNavMenu)
-            return;
+        if (mIsNavMenu) return;
         int visibility = 0;
         int navbar = 0;
         mActionBar.show();
@@ -2941,11 +2923,9 @@ public class VideoPlayerActivity extends AppCompatActivity implements IVLCVout.C
             visibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
             navbar = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
         }
-        if (AndroidUtil.isICSOrLater)
-            navbar |= View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+        navbar |= View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 
-        if (AndroidDevices.hasNavBar)
-            visibility |= navbar;
+        if (AndroidDevices.hasNavBar) visibility |= navbar;
         getWindow().getDecorView().setSystemUiVisibility(visibility);
 
     }
@@ -3402,7 +3382,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements IVLCVout.C
         updateList();
     }
 
-    private BroadcastReceiver mBtReceiver = AndroidUtil.isICSOrLater ? new BroadcastReceiver() {
+    private final BroadcastReceiver mBtReceiver = new BroadcastReceiver() {
         @TargetApi(Build.VERSION_CODES.HONEYCOMB)
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -3421,7 +3401,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements IVLCVout.C
                     }
             }
         }
-    } : null;
+    };
 
     private void toggleBtDelay(boolean connected) {
         mService.setAudioDelay(connected ? mSettings.getLong(KEY_BLUETOOTH_DELAY, 0) : 0L);
