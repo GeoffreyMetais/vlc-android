@@ -52,7 +52,7 @@ import org.videolan.libvlc.MediaPlayer;
 import org.videolan.vlc.PlaybackService;
 import org.videolan.vlc.R;
 import org.videolan.vlc.VLCApplication;
-import org.videolan.vlc.gui.PlaybackServiceFragment;
+import org.videolan.vlc.gui.PlaybackServiceActivity;
 import org.videolan.vlc.gui.audio.EqualizerFragment;
 import org.videolan.vlc.gui.helpers.UiTools;
 import org.videolan.vlc.gui.video.VideoPlayerActivity;
@@ -113,6 +113,7 @@ public class AdvOptionsDialog extends DialogFragment implements View.OnClickList
 
     private TextView mChaptersTitle;
     private int mTextColor;
+    private PlaybackServiceActivity.Helper mHelper;
     private PlaybackService mService;
 
     private IPlaybackSettingsController mPlaybackController;
@@ -132,6 +133,7 @@ public class AdvOptionsDialog extends DialogFragment implements View.OnClickList
             primary = args.containsKey(PRIMARY_DISPLAY) && args.getBoolean(PRIMARY_DISPLAY);
         }
         setStyle(DialogFragment.STYLE_NO_FRAME, 0);
+        mHelper = new PlaybackServiceActivity.Helper(getActivity(), this);
     }
 
     @Override
@@ -496,13 +498,13 @@ public class AdvOptionsDialog extends DialogFragment implements View.OnClickList
     @Override
     public void onStart() {
         super.onStart();
-        PlaybackServiceFragment.registerPlaybackService(this, this);
+        mHelper.onStart();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        PlaybackServiceFragment.unregisterPlaybackService(this, this);
+        mHelper.onStop();
     }
 
     @Override
