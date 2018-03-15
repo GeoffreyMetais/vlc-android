@@ -600,7 +600,7 @@ public abstract class BaseBrowserFragment extends MediaBrowserFragment<BrowserPr
         }
         if (!mRoot) {
             updateFab();
-            UiTools.updateSortTitles(this, mMenu);
+            UiTools.updateSortTitles(this);
         }
     }
 
