@@ -62,6 +62,9 @@ while [ $# -gt 0 ]; do
             BUILD_LIBVLC=1
             NO_ML=1
             ;;
+        -ml)
+            BUILD_MEDIALIB=1
+            ;;
         run)
             RUN=1
             ;;
@@ -288,6 +291,10 @@ if [ "$CHROME_OS" = 1 ]; then
 fi
 if [ "$BUILD_LIBVLC" = 1 ];then
     ./gradlew -p libvlc assemble${BUILDTYPE}
+    RUN=0
+    CHROME_OS=0
+elif [ "$BUILD_MEDIALIB" = 1 ]; then
+    ./gradlew -p medialibrary assemble${BUILDTYPE}
     RUN=0
     CHROME_OS=0
 else
