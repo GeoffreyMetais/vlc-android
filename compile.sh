@@ -271,7 +271,8 @@ if [ "$ASAN" = 1 ]; then
     OPTS="$OPTS --asan"
 fi
 
-if [ "$BUILD_MEDIALIB" != 1 ]; then
+# Build LibVLC if asked for it, or needed by medialibrary
+if [ "$BUILD_MEDIALIB" != 1 -o ! -d "libvlc/jni/libs/$ANDROID_ABI" ]; then
     ./compile-libvlc.sh $OPTS
 fi
 
