@@ -270,11 +270,14 @@ fi
 if [ "$ASAN" = 1 ]; then
     OPTS="$OPTS --asan"
 fi
-if [ "$NO_ML" = 1 ]; then
-    OPTS="$OPTS --no-ml"
+
+if [ "$BUILD_MEDIALIB" != 1 ]; then
+    ./compile-libvlc.sh $OPTS
 fi
 
-./compile-libvlc.sh $OPTS
+if [ "$NO_ML" != 1 ]; then
+    ./compile-medialibrary.sh $OPTS
+fi
 
 ##################
 # Compile the UI #
