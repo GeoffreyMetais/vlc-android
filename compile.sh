@@ -273,11 +273,11 @@ fi
 
 # Build LibVLC if asked for it, or needed by medialibrary
 if [ "$BUILD_MEDIALIB" != 1 -o ! -d "libvlc/jni/libs/$ANDROID_ABI" ]; then
-    ./compile-libvlc.sh $OPTS
+    GRADLE_ABI=$GRADLE_ABI ./compile-libvlc.sh $OPTS
 fi
 
 if [ "$NO_ML" != 1 ]; then
-    ./compile-medialibrary.sh $OPTS
+    GRADLE_ABI=$GRADLE_ABI ./compile-medialibrary.sh $OPTS
 fi
 
 ##################
