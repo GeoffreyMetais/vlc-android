@@ -1,3 +1,4 @@
+apply plugin: 'com.novoda.bintray-release'
 apply plugin: 'com.android.library'
 
 android {
@@ -9,17 +10,17 @@ android {
     }
 
     sourceSets {
-    main {
-        jni.srcDirs = [] // Prevent gradle from building native code with ndk; we have our own Makefile for it.
-        jniLibs.srcDirs = [ 'jni/libs' ] // Where generated .so files are placed.
-        manifest.srcFile 'AndroidManifest.xml'
-        java.srcDirs = ['src']
-        resources.srcDirs = ['src']
-        aidl.srcDirs = ['src']
-        renderscript.srcDirs = ['src']
-        res.srcDirs = ['res']
-        assets.srcDirs = ['assets' ]
-    }
+        main {
+            jni.srcDirs = [] // Prevent gradle from building native code with ndk; we have our own Makefile for it.
+            jniLibs.srcDirs = [ 'jni/libs' ] // Where generated .so files are placed.
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            resources.srcDirs = ['src']
+            aidl.srcDirs = ['src']
+            renderscript.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets' ]
+        }
     }
 
     buildTypes {
@@ -95,6 +96,22 @@ task generateSources (type: Jar) {
     from android.sourceSets.main.java.srcDirs
 }
 
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    exclude '**/BuildConfig.java'
+    exclude 'build/**'
+    exclude '**/R.java', '**/R.html', '**/R.*.html', '**/index.html'
+    failOnError false
+    options.addStringOption('Xdoclint:none', '-quiet')
+    options.addStringOption('encoding', 'UTF-8')
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
 clean {
     delete 'build', 'jni/libs', 'jni/obj'
 }
@@ -102,4 +119,25 @@ clean {
 dependencies {
     api "androidx.annotation:annotation:$rootProject.ext.androidxVersion"
     api "androidx.legacy:legacy-support-v4:$rootProject.ext.androidxVersion"
+}
+
+artifacts {
+    archives javadocJar
+    archives generateSources
+}
+
+publish {
+
+    def groupProjectID = 'org.videolan'
+    def artifactProjectID = 'android-libvlc-armv7'
+    def publishVersionID = '3.1'
+
+    userOrg = 'VideoLAN'
+    repoName = 'LibVLC'
+    groupId = groupProjectID
+    artifactId = artifactProjectID
+    publishVersion = publishVersionID
+    desc = 'LibVLC for Android'
+    website = 'https://code.videolan.org/videolan/vlc-android/'
+
 }
