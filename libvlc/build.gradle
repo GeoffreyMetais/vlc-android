@@ -6,8 +6,6 @@ ext {
     repoName = 'LibVLC'
     libraryName = 'LibVLC-Android'
     desc = 'LibVLC for Android'
-
-    publishedGroupId = 'org.videolan'
     artifact = 'libvlc'
 
     libraryDescription = 'Android bindings and API for VLC'
