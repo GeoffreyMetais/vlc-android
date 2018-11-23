@@ -5,7 +5,6 @@ ext {
     library_version = '3.1'
     repoName = 'LibVLC'
     libraryName = 'LibVLC-Android'
-    desc = 'LibVLC for Android'
     artifact = 'libvlc'
 
     libraryDescription = 'Android bindings and API for VLC'

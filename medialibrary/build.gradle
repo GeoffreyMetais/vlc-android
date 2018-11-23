@@ -27,7 +27,6 @@ ext {
     library_version = '0.4'
     repoName = 'LibVLC'
     libraryName = 'Medialibrary-Android'
-    desc = 'Medialibrary for Android'
     artifact = 'medialibrary'
 
     libraryDescription = 'Android bindings and API for Medialibrary'
