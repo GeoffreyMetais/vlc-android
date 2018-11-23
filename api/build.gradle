@@ -29,7 +29,7 @@ ext {
     repoName = 'LibVLC'
     libraryName = 'VLC-API'
     desc = 'SDK for VLC-Android extensions'
-    artifact = 'vlc-extensions'
+    lib_artifact = 'vlc-extensions'
 
     libraryDescription = 'SDK for VLC-Android extensions'
 }

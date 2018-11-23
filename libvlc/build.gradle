@@ -1,11 +1,12 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 
+def abi = System.getenv('GRADLE_ABI')?.toLowerCase()
 ext {
-    library_version = '3.1'
+    library_version = '3.1.0'
     repoName = 'LibVLC'
     libraryName = 'LibVLC-Android'
-    artifact = 'libvlc'
+    lib_artifact = "libvlc-$abi"
 
     libraryDescription = 'Android bindings and API for VLC'
 }
