@@ -102,7 +102,7 @@ elif [ "$ANDROID_ABI" = "x86" ]; then
     GRADLE_ABI="x86"
 elif [ "$ANDROID_ABI" = "x86_64" ]; then
     GRADLE_ABI="x86_64"
-else
+elif [ "$ANDROID_ABI" != "all" ]; then
     diagnostic "Invalid arch specified: '$ANDROID_ABI'."
     diagnostic "Try --help for more information"
     exit 1
@@ -260,24 +260,42 @@ cd ..
 ############
 
 diagnostic "Configuring"
-OPTS="-a ${ANDROID_ABI}"
-if [ "$RELEASE" = 1 ]; then
-    OPTS="$OPTS release"
-fi
-if [ "$CHROME_OS" = 1 ]; then
-    OPTS="$OPTS -c"
-fi
-if [ "$ASAN" = 1 ]; then
-    OPTS="$OPTS --asan"
-fi
+compile() {
+    OPTS="-a $1"
+    if [ "$RELEASE" = 1 ]; then
+        OPTS="$OPTS release"
+    fi
+    if [ "$CHROME_OS" = 1 ]; then
+        OPTS="$OPTS -c"
+    fi
+    if [ "$ASAN" = 1 ]; then
+        OPTS="$OPTS --asan"
+    fi
 
-# Build LibVLC if asked for it, or needed by medialibrary
-if [ "$BUILD_MEDIALIB" != 1 -o ! -d "libvlc/jni/libs/$ANDROID_ABI" ]; then
-    GRADLE_ABI=$GRADLE_ABI ./compile-libvlc.sh $OPTS
-fi
+    # Build LibVLC if asked for it, or needed by medialibrary
+    if [ "$BUILD_MEDIALIB" != 1 -o ! -d "libvlc/jni/libs/$ANDROID_ABI" ]; then
+        GRADLE_ABI=$GRADLE_ABI ./compile-libvlc.sh $OPTS
+    fi
 
-if [ "$NO_ML" != 1 ]; then
-    GRADLE_ABI=$GRADLE_ABI ./compile-medialibrary.sh $OPTS
+    if [ "$NO_ML" != 1 ]; then
+        GRADLE_ABI=$GRADLE_ABI ./compile-medialibrary.sh $OPTS
+    fi
+}
+if [ "$ANDROID_ABI" = "all" ]; then
+    if [ -d libvlc/tmp ]; then
+        rm -rf libvlc/tmp
+    fi
+    mkdir libvlc/tmp
+    compile armeabi-v7a
+    mv libvlc/jni/libs/armeabi-v7a libvlc/tmp
+    compile arm64-v8a
+    mv libvlc/jni/libs/arm64-v8a libvlc/tmp
+    compile x86
+    mv libvlc/jni/libs/x86 libvlc/tmp
+    compile x86_64
+    mv libvlc/tmp/* libvlc/jni/libs
+else
+    compile $ANDROID_ABI
 fi
 
 ##################
