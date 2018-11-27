@@ -102,7 +102,9 @@ elif [ "$ANDROID_ABI" = "x86" ]; then
     GRADLE_ABI="x86"
 elif [ "$ANDROID_ABI" = "x86_64" ]; then
     GRADLE_ABI="x86_64"
-elif [ "$ANDROID_ABI" != "all" ]; then
+elif [ "$ANDROID_ABI" = "all" ]; then
+    GRADLE_ABI="all"
+else
     diagnostic "Invalid arch specified: '$ANDROID_ABI'."
     diagnostic "Try --help for more information"
     exit 1
@@ -274,11 +276,11 @@ compile() {
 
     # Build LibVLC if asked for it, or needed by medialibrary
     if [ "$BUILD_MEDIALIB" != 1 -o ! -d "libvlc/jni/libs/$ANDROID_ABI" ]; then
-        GRADLE_ABI=$GRADLE_ABI ./compile-libvlc.sh $OPTS
+        ./compile-libvlc.sh $OPTS
     fi
 
     if [ "$NO_ML" != 1 ]; then
-        GRADLE_ABI=$GRADLE_ABI ./compile-medialibrary.sh $OPTS
+        ./compile-medialibrary.sh $OPTS
     fi
 }
 if [ "$ANDROID_ABI" = "all" ]; then
@@ -312,11 +314,11 @@ if [ "$CHROME_OS" = 1 ]; then
     PLATFORM="Chrome"
 fi
 if [ "$BUILD_LIBVLC" = 1 ];then
-    ./gradlew -p libvlc assemble${BUILDTYPE}
+    GRADLE_ABI=$GRADLE_ABI ./gradlew -p libvlc assemble${BUILDTYPE}
     RUN=0
     CHROME_OS=0
 elif [ "$BUILD_MEDIALIB" = 1 ]; then
-    ./gradlew -p medialibrary assemble${BUILDTYPE}
+    GRADLE_ABI=$GRADLE_ABI ./gradlew -p medialibrary assemble${BUILDTYPE}
     RUN=0
     CHROME_OS=0
 else
