@@ -81,7 +81,6 @@ bintray {
         vcsUrl = gitUrl
         labels = ['aar', 'android', 'vlc']
         dryRun = false
-        publish = true
         override = false
         publicDownloadNumbers = true
         version {

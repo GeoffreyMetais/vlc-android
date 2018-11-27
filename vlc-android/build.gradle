@@ -20,7 +20,7 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    flavorDimensions "target", "abi"
+    flavorDimensions "abi"
 
     lintOptions {
         abortOnError false
@@ -122,13 +122,13 @@ android {
             applicationIdSuffix ".debug"
             jniDebuggable true
         }
+        dev {
+            initWith debug
+            matchingFallbacks = ['debug']
+        }
     }
     productFlavors {
-        vanilla {
-            dimension "target"
-            versionCode = 1
-        }
-        ARMv7 {
+        armv7 {
             dimension "abi"
             versionCode = 4
         }
@@ -136,11 +136,7 @@ android {
             dimension "abi"
             versionCode = 5
         }
-        MIPS {
-            dimension "abi"
-            versionCode = 6
-        }
-        ARMv8 {
+        armv8 {
             dimension "abi"
             versionCode = 7
         }
@@ -148,23 +144,17 @@ android {
             dimension "abi"
             versionCode = 8
         }
-        MIPS64 {
-            dimension "abi"
-            versionCode = 9
-        }
     }
 
     // make per-variant version code
     applicationVariants.all { variant ->
 
-        def generatedCode = variant.productFlavors.get(0).versionCode * 10000000 + defaultConfig.versionCode + variant.productFlavors.get(1).versionCode
+        def generatedCode = 10000000 + defaultConfig.versionCode + variant.productFlavors.get(0).versionCode
         //Custom APK name and versionCode
         variant.outputs.each { output ->
             output.versionCodeOverride = generatedCode
             def outputName = "VLC-Android-"
-            if (variant.productFlavors.get(0).name != "vanilla")
-                outputName += variant.productFlavors.get(0).name.toUpperCase() + "-"
-            outputName += variant.versionName + "-" + variant.productFlavors.get(1).name + ".apk"
+            outputName += variant.versionName + "-" + variant.productFlavors.get(0).name + ".apk"
             output.outputFileName = outputName
         }
     }
@@ -198,10 +188,21 @@ task generateSources (type: Jar) {
     from android.sourceSets.main.java.srcDirs
 }
 
+configurations {
+    devImplementation
+    armv7Implementation
+    armv8Implementation
+    x86Implementation
+    x86_64Implementation
+}
 dependencies {
-    implementation project(':libvlc')
+    devImplementation project(':libvlc')
+    devImplementation project(':medialibrary')
+    armv7Implementation 'org.gmetais:libvlc-armv7:3.1.0'
+    x86Implementation 'org.gmetais:libvlc-x86:3.1.0'
     implementation project(':medialibrary')
     implementation project(':api')
+    implementation project(":tools")
     // AppCompat
     implementation "androidx.recyclerview:recyclerview:$rootProject.ext.androidxVersion"
     implementation "com.google.android.material:material:$rootProject.ext.androidxVersion"
@@ -224,7 +225,6 @@ dependencies {
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:$rootProject.ext.retrofit"
     implementation "com.squareup.retrofit2:converter-moshi:$rootProject.ext.retrofit"
-    implementation project(":tools")
     // Test
     androidTestImplementation "androidx.test.espresso:espresso-contrib:$rootProject.espressoVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.espressoVersion"
