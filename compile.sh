@@ -284,32 +284,34 @@ compile() {
         ./compile-medialibrary.sh $OPTS
     fi
 }
-if [ "$ANDROID_ABI" = "all" ]; then
-    if [ -d tmp ]; then
+if [ "$BUILD_MEDIALIB" = 1 -o "$BUILD_LIBVLC" = 1 -o "$RELEASE" != 1 ]; then
+    if [ "$ANDROID_ABI" = "all" ]; then
+        if [ -d tmp ]; then
+            rm -rf tmp
+        fi
+        mkdir tmp
+        LIB_DIR="libvlc"
+        if [ "$NO_ML" != 1 ]; then
+            LIB_DIR="medialibrary"
+        fi
+        compile armeabi-v7a
+        cp -r $LIB_DIR/jni/libs/armeabi-v7a tmp
+        compile arm64-v8a
+        cp -r $LIB_DIR/jni/libs/arm64-v8a tmp
+        compile x86
+        cp -r $LIB_DIR/jni/libs/x86 tmp
+        compile x86_64
+        mv tmp/* $LIB_DIR/jni/libs
         rm -rf tmp
+    else
+        compile $ANDROID_ABI
     fi
-    mkdir tmp
-    LIB_DIR="libvlc"
-    if [ "$NO_ML" != 1 ]; then
-        LIB_DIR="medialibrary"
-    fi
-    compile armeabi-v7a
-    cp -r $LIB_DIR/jni/libs/armeabi-v7a tmp
-    compile arm64-v8a
-    cp -r $LIB_DIR/jni/libs/arm64-v8a tmp
-    compile x86
-    cp -r $LIB_DIR/jni/libs/x86 tmp
-    compile x86_64
-    mv tmp/* $LIB_DIR/jni/libs
-    rm -rf tmp
-else
-    compile $ANDROID_ABI
 fi
 
 ##################
 # Compile the UI #
 ##################
-BUILDTYPE="Debug"
+BUILDTYPE="Dev"
 if [ "$SIGNED_RELEASE" = 1 ]; then
     BUILDTYPE="signedRelease"
 elif [ "$RELEASE" = 1 ]; then
@@ -335,7 +337,7 @@ else
     else
         ACTION="assemble"
     fi
-    TARGET="${ACTION}${GRADLE_ABI}${BUILDTYPE}"
+    TARGET="${ACTION}${BUILDTYPE}"
     CLI="" ./gradlew $TARGET
 fi
 

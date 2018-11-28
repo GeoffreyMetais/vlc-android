@@ -1,3 +1,5 @@
+import com.android.build.OutputFile
+
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
@@ -127,46 +129,35 @@ android {
             matchingFallbacks = ['debug']
         }
     }
-    productFlavors {
-        armv7 {
-            dimension "abi"
-            versionCode = 4
-            ndk {
-                abiFilters "armeabi-v7a"
+
+    splits {
+        abi {
+            def isReleaseBuild = false
+            gradle.startParameter.taskNames.find {
+                // Enable split for release builds in different build flavors
+                // (assemblePaidRelease, assembleFreeRelease, etc.).
+                if (it.toLowerCase() ==~ /assemble.*Release/.toLowerCase()) {
+                    isReleaseBuild = true
+                    return true // break
+                }
+                return false // continue
             }
-        }
-        x86 {
-            dimension "abi"
-            versionCode = 5
-            ndk {
-                abiFilter "x86"
-            }
-        }
-        armv8 {
-            dimension "abi"
-            versionCode = 7
-            ndk {
-                abiFilters "armeabi-v8a"
-            }
-        }
-        x86_64 {
-            dimension "abi"
-            versionCode = 8
-            ndk {
-                abiFilter "x86_64"
-            }
+            enable isReleaseBuild
+            reset()
+            include "x86", "x86_64", "armeabi-v7a", "arm64-v8a"
+//            universalApk !isReleaseBuild
         }
     }
 
+    def abiCodes = ['x86':5, 'x86_64':8, 'armeabi-v7a':4, 'arm64-v8a':7]
     // make per-variant version code
     applicationVariants.all { variant ->
-
-        def generatedCode = 10000000 + defaultConfig.versionCode + variant.productFlavors.get(0).versionCode
         //Custom APK name and versionCode
         variant.outputs.each { output ->
-            output.versionCodeOverride = generatedCode
+            def abiName = output.getFilter(OutputFile.ABI) ?: "all"
+            output.versionCodeOverride = 10000000 + defaultConfig.versionCode + abiCodes.get(abiName, 0)
             def outputName = "VLC-Android-"
-            outputName += variant.versionName + "-" + variant.productFlavors.get(0).name + ".apk"
+            outputName += variant.versionName + "-" + abiName + ".apk"
             output.outputFileName = outputName
         }
     }
@@ -201,16 +192,14 @@ task generateSources (type: Jar) {
 }
 
 dependencies {
-    def libvlc_version = '3.1.0'
-    def medialibrary_version = '0.4'
     devImplementation project(':libvlc')
     devImplementation project(':medialibrary')
-    debugImplementation "org.gmetais:libvlc-all:$libvlc_version"
-    debugImplementation "org.gmetais:medialibrary-all:$medialibrary_version"
-    releaseImplementation "org.gmetais:libvlc-all:$libvlc_version"
-    releaseImplementation "org.gmetais:medialibrary-all:$medialibrary_version"
+    debugImplementation "org.gmetais:libvlc-all:$rootProject.ext.libvlcVersion"
+    debugImplementation "org.gmetais:medialibrary-all:$rootProject.ext.medialibraryVersion"
+    releaseImplementation "org.gmetais:libvlc-all:$rootProject.ext.libvlcVersion"
+    releaseImplementation "org.gmetais:medialibrary-all:$rootProject.ext.medialibraryVersion"
     implementation project(':api')
-    implementation project(":tools")
+    implementation project(':tools')
     // AppCompat
     implementation "androidx.recyclerview:recyclerview:$rootProject.ext.androidxVersion"
     implementation "com.google.android.material:material:$rootProject.ext.androidxVersion"
