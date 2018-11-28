@@ -88,7 +88,8 @@ clean {
 }
 
 dependencies {
-    implementation project(':libvlc')
+    implementation 'org.gmetais:libvlc-all:3.1.0'
+//    implementation project(':libvlc')
     api "androidx.legacy:legacy-support-v4:$rootProject.ext.androidxVersion"
     api "androidx.core:core:$rootProject.ext.androidxVersion"
     api "androidx.fragment:fragment:$rootProject.ext.androidxVersion"

@@ -131,18 +131,30 @@ android {
         armv7 {
             dimension "abi"
             versionCode = 4
+            ndk {
+                abiFilters "armeabi-v7a"
+            }
         }
         x86 {
             dimension "abi"
             versionCode = 5
+            ndk {
+                abiFilter "x86"
+            }
         }
         armv8 {
             dimension "abi"
             versionCode = 7
+            ndk {
+                abiFilters "armeabi-v8a"
+            }
         }
         x86_64 {
             dimension "abi"
             versionCode = 8
+            ndk {
+                abiFilter "x86_64"
+            }
         }
     }
 
@@ -188,19 +200,15 @@ task generateSources (type: Jar) {
     from android.sourceSets.main.java.srcDirs
 }
 
-configurations {
-    devImplementation
-    armv7Implementation
-    armv8Implementation
-    x86Implementation
-    x86_64Implementation
-}
 dependencies {
+    def libvlc_version = '3.1.0'
+    def medialibrary_version = '0.4'
     devImplementation project(':libvlc')
     devImplementation project(':medialibrary')
-    armv7Implementation 'org.gmetais:libvlc-armv7:3.1.0'
-    x86Implementation 'org.gmetais:libvlc-x86:3.1.0'
-    implementation project(':medialibrary')
+    debugImplementation "org.gmetais:libvlc-all:$libvlc_version"
+    debugImplementation "org.gmetais:medialibrary-all:$medialibrary_version"
+    releaseImplementation "org.gmetais:libvlc-all:$libvlc_version"
+    releaseImplementation "org.gmetais:medialibrary-all:$medialibrary_version"
     implementation project(':api')
     implementation project(":tools")
     // AppCompat
